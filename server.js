@@ -20,6 +20,7 @@ const server=http.createServer(async(req,res)=>{try{
   if(path==='/api/create'){({room:r,player:p}=game.create(b.name,b.rotations,b.topic,b.practice));}
   else if(path==='/api/join'){r=game.get(b.code);p=game.join(r.code,b.name);}
   else {r=game.get(b.code);p=game.auth(r,b.token);if(game.tick(r))publish(r);
+   if(path==='/api/leave'){game.leave(r,p);for(const c of streams.get(r.code)??[]){if(c.player.id===p.id){c.res.write('event: left\ndata: {}\n\n');c.res.end();streams.get(r.code).delete(c);}}publish(r);return json(res,200,{left:true});}
    if(path==='/api/state'){}else if(path==='/api/start')game.start(r,p);else if(path==='/api/choose')game.choose(r,p,b.option);else if(path==='/api/next')game.next(r,p);else if(path==='/api/replay')game.replay(r,p);else throw Error('Unknown action.');
   }
   publish(r);return json(res,200,{code:r.code,token:p.token,state:game.view(r,p)});

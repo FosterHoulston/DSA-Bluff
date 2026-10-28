@@ -42,6 +42,8 @@ The Node tests cover complete 2–8 player games, role and phase restrictions, s
 
 ## Prototype limitations
 
-Rooms and scores live in server memory: restarting the server clears them. No accounts, saved match history, lobby player removal, or automatic host transfer yet. A disconnected player retains their seat and receives normal timeout penalties; the host must reconnect in their original tab to advance. Narrow playlists repeat puzzles when the game is longer than the playlist. Mixed has enough unique puzzles for a standard eight-player game. Phones may need to scroll horizontally on the longest code lines; visual polish and device-specific tuning remain future work.
+Rooms and scores live in server memory: restarting the server clears them. No accounts, saved match history, lobby player removal, yet. Explicitly leaving from the lobby or final results transfers hosting to the earliest remaining player. A disconnected player retains their seat and receives normal timeout penalties; the host must reconnect in their original tab to advance. Narrow playlists repeat puzzles when the game is longer than the playlist. Mixed has enough unique puzzles for a standard eight-player game. Phones may need to scroll horizontally on the longest code lines; visual polish and device-specific tuning remain future work.
 
 Architecture: Node built-in HTTP server + server-sent events, pure game engine, vanilla HTML/CSS/JS. No external services, build step, or runtime dependencies. Correct answers and explanations are withheld from clients until reveal. Keep this as a local playtest prototype; production hosting and persistence are separate future work.
+
+After a game, each player can return to the lobby independently or leave the room. Final standings are preserved under View last results. Only the host can restart once everyone remaining has returned, with at least two players. Scores reset on restart.

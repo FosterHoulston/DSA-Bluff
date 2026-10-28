@@ -14,16 +14,17 @@ export class Game {
   this.rooms.set(code,room); const player=this.join(code,name);room.host=player.id;return {room,player};
  }
  join(code,name) {
-  const room=this.get(code); if(room.phase!=='lobby')fail('This game has started. Reconnect from your original tab.');
+  const room=this.get(code); if(!['lobby','finished'].includes(room.phase))fail('This game has started. Reconnect from your original tab.');
   name=String(name??'').trim();if(!name||name.length>20)fail('Use a name between 1 and 20 characters.');
   if(room.players.length>=8)fail('Room is full.');
   if(room.players.some(p=>p.name.toLowerCase()===name.toLowerCase()))fail('That name is already in the room.');
-  const p={id:randomUUID(),token:randomUUID(),name,score:0};room.players.push(p);room.updated=this.now();return p;
+  const p={id:randomUUID(),token:randomUUID(),name,score:0,returned:true};room.players.push(p);room.updated=this.now();return p;
  }
  get(code){const r=this.rooms.get(String(code).toUpperCase());if(!r)fail('Room not found. Check the code.');return r;}
  auth(room,token){const p=room.players.find(p=>p.token===token);if(!p)fail('Your session is not in this room.');return p;}
  host(room,p){if(room.host!==p.id)fail('Only the host can do that.');}
- start(room,p){this.host(room,p);if(room.phase!=='lobby')fail('Game already started.');if(room.players.length<2)fail('At least two players are needed.');
+ start(room,p){this.host(room,p);if(room.phase!=='lobby')fail('Game already started.');if(room.players.length<2)fail('At least two players are needed.');if(room.players.some(p=>!p.returned))fail('Wait for everyone to return to the lobby.');
+  room.round=-1;room.votes={};room.delta={};for(const player of room.players){player.score=0;player.returned=false;}
   room.order=shuffle(room.players.map(p=>p.id));room.totalRounds=room.players.length*room.rotations;
   const pool=puzzles.filter(p=>room.topic==='Mixed'||p.topic===room.topic);room.deck=[];
   while(room.deck.length<room.totalRounds)room.deck.push(...shuffle(pool));room.deck=room.deck.slice(0,room.totalRounds);this.begin(room);
@@ -46,10 +47,23 @@ export class Game {
   room.delta[room.bluffer]=room.failed?-1:award(fooled,room.players.length-1);for(const p of room.players)p.score+=room.delta[p.id];room.fooled=fooled;room.phase='reveal';room.deadline=null;room.updated=this.now();
  }
  tick(room){if(room.deadline!==null&&this.now()>=room.deadline){if(room.phase==='read'){this.beginBluff(room);}else if(room.phase==='bluff'){room.failed=true;this.solve(room);}else if(room.phase==='solve')this.reveal(room);room.updated=this.now();return true;}return false;}
- next(room,p){this.host(room,p);if(room.phase==='read'&&room.practice){this.beginBluff(room);return;}if(room.phase!=='reveal')fail('Wait for the reveal.');if(room.round+1===room.totalRounds){room.phase='finished';room.updated=this.now();}else this.begin(room);}
- replay(room,p){this.host(room,p);if(room.phase!=='finished')fail('Finish the game first.');room.phase='lobby';room.round=-1;room.deadline=null;for(const p of room.players)p.score=0;room.updated=this.now();}
+ next(room,p){this.host(room,p);if(room.phase==='read'&&room.practice){this.beginBluff(room);return;}if(room.phase!=='reveal')fail('Wait for the reveal.');if(room.round+1===room.totalRounds){room.phase='finished';room.lastResults=room.players.map(({id,name,score})=>({id,name,score}));for(const player of room.players)player.returned=false;room.updated=this.now();}else this.begin(room);}
+ replay(room,p){
+  if(!['finished','lobby'].includes(room.phase)||!room.lastResults)fail('Finish the game first.');
+  p.returned=true;
+  if(room.players.every(player=>player.returned))room.phase='lobby';
+  room.updated=this.now();
+ }
+ leave(room,p){
+  if(!['lobby','finished'].includes(room.phase))fail('Leave the room from the lobby or final results.');
+  room.players=room.players.filter(player=>player.id!==p.id);
+  if(!room.players.length){this.rooms.delete(room.code);return;}
+  if(room.host===p.id)room.host=room.players[0].id;
+  if(room.phase==='finished'&&room.players.every(player=>player.returned))room.phase='lobby';
+  room.updated=this.now();
+ }
  view(room,p){const isReveal=['reveal','finished'].includes(room.phase);const q=room.q;
-  const v={code:room.code,phase:room.phase,host:room.host,you:p.id,players:room.players.map(({id,name,score})=>({id,name,score})),rotations:room.rotations,practice:room.practice,topic:room.topic,round:room.round+1,totalRounds:room.totalRounds??0,bluffer:room.bluffer,deadline:room.deadline,serverTime:this.now(),submitted:!!room.votes?.[p.id],answered:Object.keys(room.votes??{}).length};
+  const v={code:room.code,phase:room.phase==='finished'&&p.returned?'lobby':room.phase,host:room.host,you:p.id,players:room.players.map(({id,name,score,returned})=>({id,name,score,returned})),lastResults:room.lastResults??null,canStart:room.players.length>=2&&room.players.every(player=>player.returned),rotations:room.rotations,practice:room.practice,topic:room.topic,round:room.round+1,totalRounds:room.totalRounds??0,bluffer:room.bluffer,deadline:room.deadline,serverTime:this.now(),submitted:!!room.votes?.[p.id],answered:Object.keys(room.votes??{}).length};
   if(q&&!['lobby','finished'].includes(room.phase)){v.puzzle={title:q.title,statement:q.statement,topic:q.topic,...(room.phase==='read'?{}:{code:q.code}),blanks:q.options[0].values.length};
    const ids=room.phase==='read'?[]:isReveal?room.solverOptions:room.phase==='solve'?room.solverOptions:p.id===room.bluffer?room.bluffOptions:[];
    v.options=ids.map(id=>{const o=q.options.find(o=>o.id===id);return {id:o.id,values:o.values,...(isReveal?{why:o.why}: {})};});

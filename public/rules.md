@@ -118,3 +118,11 @@ The game ends after the chosen number of full rotations, giving everyone the sam
 The host can choose untimed practice when creating a room. Reading and both decision phases have no countdown or automatic timeout. The host advances from shared reading when the group is ready; the Bluffer locks a choice to start Solver selection, and all Solvers must submit to reach the reveal. Scoring and role rotation are unchanged, including the penalty for selecting a correct solution as the Bluffer. There are no timeout penalties in practice mode. The host still advances after discussion.
 
 Blank count is a starting guide for decision time, rather than a guarantee of difficulty. A timed round allows up to 3½ minutes for 1–2 blanks or 4½ minutes for 3–4 blanks, before discussion.
+
+## After the game
+
+The host ends the final round’s discussion by advancing to final results, which appear for everyone. Every player can independently choose **Return to lobby** and remain in the same room. Other players can keep viewing results until they are ready. The lobby shows how many players have returned and offers **View last results**.
+
+Only the host may start the next game, once all remaining players have returned and at least two players are present. Scores reset when the next game starts; the previous final standings remain available in the lobby until replaced by the next completed game.
+
+Everyone can choose **Leave room** from the lobby or final results to return to the home screen and free their seat. If the host leaves, the earliest remaining player becomes host. Leaving does not remove a player from historical results. Empty rooms close automatically. Leaving during an active round is not supported yet; reconnecting retains the existing seat.

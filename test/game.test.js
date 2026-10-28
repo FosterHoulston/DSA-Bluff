@@ -6,7 +6,7 @@ function setup(n=3){let now=0;const g=new Game({now:()=>now,phaseMs:100});const 
 const bluffer=r=>r.players.find(p=>p.id===r.bluffer);
 const solvers=r=>r.players.filter(p=>p.id!==r.bluffer);
 const wrong=r=>r.bluffOptions.find(id=>id!==r.q.correct);
-test('2–8 players complete equal rotations with exact scores',()=>{for(let n=2;n<=8;n++){const {g,r,h,advance}=setup(n),turns={};for(let round=0;round<n;round++){if(r.phase==='read'){advance(30000);g.tick(r);}const b=bluffer(r);turns[b.id]=(turns[b.id]??0)+1;const trap=wrong(r);g.choose(r,b,trap);assert.equal(new Set(r.solverOptions).size,4);assert.ok(r.solverOptions.includes(trap));assert.ok(r.solverOptions.includes(r.q.correct));const ss=solvers(r);for(let i=0;i<ss.length;i++)g.choose(r,ss[i],i===0?trap:r.q.correct);assert.equal(r.phase,'reveal');assert.equal(r.delta[b.id],award(1,n-1));assert.equal(r.delta[ss[0].id],-1);for(const p of ss.slice(1))assert.equal(r.delta[p.id],2);g.next(r,h);}assert.equal(r.phase,'finished');assert.deepEqual(Object.values(turns),Array(n).fill(1));g.replay(r,h);assert.equal(r.phase,'lobby');assert.ok(r.players.every(p=>p.score===0));}});
+test('2–8 players complete equal rotations with exact scores',()=>{for(let n=2;n<=8;n++){const {g,r,h,advance}=setup(n),turns={};for(let round=0;round<n;round++){if(r.phase==='read'){advance(30000);g.tick(r);}const b=bluffer(r);turns[b.id]=(turns[b.id]??0)+1;const trap=wrong(r);g.choose(r,b,trap);assert.equal(new Set(r.solverOptions).size,4);assert.ok(r.solverOptions.includes(trap));assert.ok(r.solverOptions.includes(r.q.correct));const ss=solvers(r);for(let i=0;i<ss.length;i++)g.choose(r,ss[i],i===0?trap:r.q.correct);assert.equal(r.phase,'reveal');assert.equal(r.delta[b.id],award(1,n-1));assert.equal(r.delta[ss[0].id],-1);for(const p of ss.slice(1))assert.equal(r.delta[p.id],2);g.next(r,h);}assert.equal(r.phase,'finished');assert.deepEqual(Object.values(turns),Array(n).fill(1));for(const p of r.players)g.replay(r,p);assert.equal(r.phase,'lobby');g.start(r,h);assert.ok(r.players.every(p=>p.score===0));}});
 test('correct Bluffer selection costs exactly one and never earns',()=>{const {g,r}=setup();const b=bluffer(r);g.choose(r,b,r.q.correct);for(const s of solvers(r))g.choose(r,s,r.q.correct);assert.equal(r.delta[b.id],-1);assert.equal(r.fooled,0);});
 test('timeouts advance both phases and score missing answers once',()=>{const {g,r,advance}=setup();advance(101);g.tick(r);assert.equal(r.phase,'solve');advance(101);g.tick(r);assert.equal(r.phase,'reveal');assert.ok(Object.values(r.delta).every(n=>n===-1));const scores=r.players.map(p=>p.score);g.tick(r);assert.deepEqual(r.players.map(p=>p.score),scores);});
 test('other wrong choices do not earn bluff points',()=>{const {g,r}=setup();const b=bluffer(r);g.choose(r,b,wrong(r));const other=r.solverOptions.find(id=>id!==r.bluff&&id!==r.q.correct);for(const s of solvers(r))g.choose(r,s,other);assert.equal(r.delta[b.id],0);});
@@ -31,4 +31,21 @@ test('both decision durations and untimed practice transitions',()=>{
  assert.throws(()=>g.next(r,r.players[1]));g.next(r,h);assert.equal(r.phase,'bluff');assert.equal(r.deadline,null);
  g.choose(r,bluffer(r),wrong(r));assert.equal(r.phase,'solve');assert.equal(r.deadline,null);assert.equal(g.tick(r),false);
  g.choose(r,solvers(r)[0],r.q.correct);assert.equal(r.phase,'reveal');g.next(r,h);assert.equal(r.phase,'read');assert.equal(r.deadline,null);
+});
+
+function finishGame(n=3){const x=setup(n);const {g,r,h,advance}=x;while(r.phase!=='finished'){if(r.phase==='read'){advance(30000);g.tick(r);}g.choose(r,bluffer(r),wrong(r));for(const p of solvers(r))g.choose(r,p,r.q.correct);g.next(r,h);}return x;}
+test('players return individually, results remain immutable, restart waits for everyone',()=>{
+ const {g,r,h}=finishGame();const other=r.players.find(p=>p.id!==h.id),snapshot=structuredClone(r.lastResults);
+ g.replay(r,other);assert.equal(g.view(r,other).phase,'lobby');assert.equal(g.view(r,h).phase,'finished');assert.equal(g.view(r,other).canStart,false);
+ g.replay(r,h);assert.throws(()=>g.start(r,h));assert.throws(()=>g.start(r,other));
+ g.replay(r,r.players.find(p=>!p.returned));assert.equal(g.view(r,h).canStart,true);g.start(r,h);assert.equal(r.round,0);assert.equal(r.phase,'read');assert.ok(r.players.every(p=>p.score===0));assert.deepEqual(r.lastResults,snapshot);
+});
+test('leaving results transfers host, retains historical scores and releases restart gate',()=>{
+ const {g,r,h}=finishGame(2),other=r.players.find(p=>p.id!==h.id),snapshot=structuredClone(r.lastResults);
+ g.replay(r,other);g.leave(r,h);assert.equal(r.host,other.id);assert.equal(r.phase,'lobby');assert.equal(g.view(r,other).canStart,false);assert.deepEqual(r.lastResults,snapshot);assert.throws(()=>g.auth(r,h.token));
+ g.join(r.code,'New player');assert.equal(g.view(r,other).canStart,true);g.leave(r,other);g.leave(r,r.players[0]);assert.throws(()=>g.get(r.code));
+});
+test('returning early is forbidden and joining a finished room does not erase results',()=>{
+ const active=setup();assert.throws(()=>active.g.replay(active.r,active.h));assert.throws(()=>active.g.leave(active.r,active.h));
+ const {g,r}=finishGame(2);const p=g.join(r.code,'New player');assert.equal(g.view(r,p).phase,'lobby');assert.equal(g.view(r,p).canStart,false);assert.equal(r.lastResults.length,2);
 });
