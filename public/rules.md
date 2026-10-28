@@ -7,7 +7,7 @@ A real-time party game for **2–8 players**. Solve short interview-style coding
 - Join from your own device using a **room code**.
 - Choose a DSA topic playlist or a mixed set.
 - Each round has one **Bluffer**; everyone else is a **Solver**.
-- The Bluffer role rotates evenly. A standard game lasts **two full rotations**; quick mode lasts one.
+- The Bluffer role rotates evenly. A standard game lasts **one full rotation**. Choose two rotations for a longer session.
 
 ## The puzzles
 
@@ -19,22 +19,27 @@ Each puzzle includes:
 
 Each puzzle has exactly **one correct option**. Incorrect options contain plausible mistakes involving boundaries, conditions, updates, or other DSA implementation details.
 
-## 1. Bluffer selection
+## 1. Shared reading
+
+Every round starts with **30 seconds** for everyone to read the problem statement and essential constraints together. Code and answer options are hidden from all players during this phase. Reading ends automatically; no points are at stake.
+
+## 2. Bluffer selection
 
 The Bluffer privately sees four unlabeled completion options, including the correct solution.
 
 Their goal is to select an option that is **incorrect but convincing enough to fool Solvers**.
 
-- **1–2 blanks:** 30 seconds.
-- **3–4 blanks:** 45 seconds.
+- **1–2 blanks:** 90 seconds.
+- **3–4 blanks:** 120 seconds.
 - The selection locks when submitted.
-- Solvers wait until the selection is complete.
+- Everyone can see the code with blanks during this phase. Only the Bluffer sees answer options; Solvers can reason about the code while they wait.
+- The phase ends early when the Bluffer locks their choice.
 
 If the Bluffer selects the correct solution, they **lose 1 point and cannot earn any points that round**. This outcome remains hidden until the reveal.
 
 If the Bluffer times out, the same penalty applies.
 
-## 2. Solver selection
+## 3. Solver selection
 
 Solvers see the puzzle and four shuffled options:
 
@@ -46,11 +51,12 @@ If the Bluffer selected the correct solution or timed out, the game supplies thr
 
 Each Solver independently selects the option that correctly fills **all blanks**. Tapping an option previews its replacements in the code; submitting locks the answer.
 
-- **1–2 blanks:** 30 seconds.
-- **3–4 blanks:** 45 seconds.
+- **1–2 blanks:** 90 seconds.
+- **3–4 blanks:** 120 seconds.
 - Other players’ answers remain hidden until the reveal.
+- Solvers receive a fresh full timer. This phase ends early when all Solvers lock their answers.
 
-## 3. Scoring
+## 4. Scoring
 
 ### Bluffer
 
@@ -89,7 +95,7 @@ For example, with seven Solvers:
 
 **Scores can go below zero.**
 
-## 4. Reveal and learning
+## 5. Reveal and learning
 
 After all Solvers submit or time expires, the game reveals:
 
@@ -101,8 +107,14 @@ After all Solvers submit or time expires, the game reveals:
 
 The host advances after players have had time to read and discuss.
 
-## 5. Winning
+## 6. Winning
 
 The game ends after the chosen number of full rotations, giving everyone the same number of turns as Bluffer.
 
 **The player with the highest total score wins. Tied players share the win.**
+
+## Untimed practice mode
+
+The host can choose untimed practice when creating a room. Reading and both decision phases have no countdown or automatic timeout. The host advances from shared reading when the group is ready; the Bluffer locks a choice to start Solver selection, and all Solvers must submit to reach the reveal. Scoring and role rotation are unchanged, including the penalty for selecting a correct solution as the Bluffer. There are no timeout penalties in practice mode. The host still advances after discussion.
+
+Blank count is a starting guide for decision time, rather than a guarantee of difficulty. A timed round allows up to 3½ minutes for 1–2 blanks or 4½ minutes for 3–4 blanks, before discussion.

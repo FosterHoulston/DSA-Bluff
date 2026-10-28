@@ -17,7 +17,7 @@ const server=http.createServer(async(req,res)=>{try{
  if(req.method==='POST'&&path.startsWith('/api/')){
   if(req.headers.origin&&req.headers.origin!==`http://${req.headers.host}`&&req.headers.origin!==`https://${req.headers.host}`)return json(res,403,{error:'Cross-origin requests are not allowed.'});
   const b=await body(req);let r,p;
-  if(path==='/api/create'){({room:r,player:p}=game.create(b.name,b.rotations,b.topic));}
+  if(path==='/api/create'){({room:r,player:p}=game.create(b.name,b.rotations,b.topic,b.practice));}
   else if(path==='/api/join'){r=game.get(b.code);p=game.join(r.code,b.name);}
   else {r=game.get(b.code);p=game.auth(r,b.token);if(game.tick(r))publish(r);
    if(path==='/api/state'){}else if(path==='/api/start')game.start(r,p);else if(path==='/api/choose')game.choose(r,p,b.option);else if(path==='/api/next')game.next(r,p);else if(path==='/api/replay')game.replay(r,p);else throw Error('Unknown action.');

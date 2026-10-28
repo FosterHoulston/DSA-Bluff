@@ -22,7 +22,9 @@ Use another port with `PORT=3001 npm start` or `node server.js --port 3001`.
 - Room codes, 2–8 players, host start and reveal advance.
 - Live server-sent updates, server timing, private role-specific views.
 - Randomized role rotation and answer order; opaque answer identifiers.
-- One or two full rotations, equal Bluffer turns, shared winners, replay.
+- One rotation by default, or two for a longer game; equal Bluffer turns, shared winners, replay.
+- Shared 30-second statement-only reading phase, then 90/120 seconds per decision phase for 1–2/3–4 blanks.
+- Untimed practice: host advances reading, Bluffer and Solvers advance by locking choices.
 - 1–4 highlighted numbered blanks; bundled replacements preview in the code.
 - Exact approved integer scoring, penalties, timeouts and locked submissions.
 - Refresh/reconnect in the same tab while the server is running.
