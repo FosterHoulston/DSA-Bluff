@@ -10,7 +10,7 @@ export class Game {
   if(![1,2].includes(rotations)) fail('Choose one or two rotations.');
   if(!['Mixed',...new Set(puzzles.map(p=>p.topic))].includes(topic)) fail('Unknown playlist.');
   let code; do {code=Array.from({length:5},()=> 'ABCDEFGHJKLMNPQRSTUVWXYZ'[randomInt(24)]).join('');}while(this.rooms.has(code));
-  const room={code,players:[],host:null,phase:'lobby',rotations,topic,practice,round:-1,deadline:null,updated:this.now()};
+  const room={code,players:[],removedTokens:new Set(),host:null,phase:'lobby',rotations,topic,practice,round:-1,deadline:null,updated:this.now()};
   this.rooms.set(code,room); const player=this.join(code,name);room.host=player.id;return {room,player};
  }
  join(code,name) {
@@ -21,7 +21,7 @@ export class Game {
   const p={id:randomUUID(),token:randomUUID(),name,score:0,returned:true};room.players.push(p);room.updated=this.now();return p;
  }
  get(code){const r=this.rooms.get(String(code).toUpperCase());if(!r)fail('Room not found. Check the code.');return r;}
- auth(room,token){const p=room.players.find(p=>p.token===token);if(!p)fail('Your session is not in this room.');return p;}
+ auth(room,token){if(room.removedTokens.has(token))throw Object.assign(new Error('You were removed from the room.'),{code:'PLAYER_REMOVED'});const p=room.players.find(p=>p.token===token);if(!p)fail('Your session is not in this room.');return p;}
  host(room,p){if(room.host!==p.id)fail('Only the host can do that.');}
  start(room,p){this.host(room,p);if(room.phase!=='lobby')fail('Game already started.');if(room.players.length<2)fail('At least two players are needed.');if(room.players.some(p=>!p.returned))fail('Wait for everyone to return to the lobby.');
   room.round=-1;room.votes={};room.delta={};for(const player of room.players){player.score=0;player.returned=false;}
@@ -53,6 +53,16 @@ export class Game {
   p.returned=true;
   if(room.players.every(player=>player.returned))room.phase='lobby';
   room.updated=this.now();
+ }
+ kick(room,p,playerId){
+  this.host(room,p);
+  if(!['lobby','finished'].includes(room.phase))fail('Players can only be removed before or after a game.');
+  if(playerId===p.id)fail('Use Leave room to leave your own room.');
+  const target=room.players.find(player=>player.id===playerId);
+  if(!target)fail('That player is no longer in the room.');
+  room.removedTokens.add(target.token);
+  this.leave(room,target);
+  return target;
  }
  leave(room,p){
   if(!['lobby','finished'].includes(room.phase))fail('Leave the room from the lobby or final results.');

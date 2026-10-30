@@ -126,3 +126,9 @@ The host ends the final round’s discussion by advancing to final results, whic
 Only the host may start the next game, once all remaining players have returned and at least two players are present. Scores reset when the next game starts; the previous final standings remain available in the lobby until replaced by the next completed game.
 
 Everyone can choose **Leave room** from the lobby or final results to return to the home screen and free their seat. If the host leaves, the earliest remaining player becomes host. Leaving does not remove a player from historical results. Empty rooms close automatically. Leaving during an active round is not supported yet; reconnecting retains the existing seat.
+
+## Removing players
+
+The host can kick another player from the lobby before a game or from the room after a game has finished, including players still viewing final results. The host confirms the player’s name before removal. The removed player is sent to the home screen with “You were removed from the room,” their seat is freed, and their previous session can no longer access the room. Completed standings remain unchanged.
+
+Kicking is unavailable throughout an active game, including shared reading, Bluffer selection, Solver selection, and round reveals. The host cannot kick themselves; use **Leave room** instead. Removal is not a ban: a player with the room code may join again as a new session.

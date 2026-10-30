@@ -20,6 +20,7 @@ Use another port with `PORT=3001 npm start` or `node server.js --port 3001`.
 ## Implemented
 
 - Room codes, 2–8 players, host start and reveal advance.
+- Host-only kicking in the lobby or after the game, with confirmation, immediate session revocation, and a removal message. Kicking is blocked during all active match phases and does not ban rejoining.
 - Live server-sent updates, server timing, private role-specific views.
 - Randomized role rotation and answer order; opaque answer identifiers.
 - One rotation by default, or two for a longer game; equal Bluffer turns, shared winners, replay.
@@ -42,7 +43,7 @@ The Node tests cover complete 2–8 player games, role and phase restrictions, s
 
 ## Prototype limitations
 
-Rooms and scores live in server memory: restarting the server clears them. No accounts, saved match history, lobby player removal, yet. Explicitly leaving from the lobby or final results transfers hosting to the earliest remaining player. A disconnected player retains their seat and receives normal timeout penalties; the host must reconnect in their original tab to advance. Narrow playlists repeat puzzles when the game is longer than the playlist. Mixed has enough unique puzzles for a standard eight-player game. Phones may need to scroll horizontally on the longest code lines; visual polish and device-specific tuning remain future work.
+Rooms and scores live in server memory: restarting the server clears them. No accounts or persistent match history yet. Explicitly leaving from the lobby or final results transfers hosting to the earliest remaining player. A disconnected player retains their seat and receives normal timeout penalties; the host must reconnect in their original tab to advance. Narrow playlists repeat puzzles when the game is longer than the playlist. Mixed has enough unique puzzles for a standard eight-player game. Phones may need to scroll horizontally on the longest code lines; visual polish and device-specific tuning remain future work.
 
 Architecture: Node built-in HTTP server + server-sent events, pure game engine, vanilla HTML/CSS/JS. No external services, build step, or runtime dependencies. Correct answers and explanations are withheld from clients until reveal. Keep this as a local playtest prototype; production hosting and persistence are separate future work.
 

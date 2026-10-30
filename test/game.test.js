@@ -49,3 +49,28 @@ test('returning early is forbidden and joining a finished room does not erase re
  const active=setup();assert.throws(()=>active.g.replay(active.r,active.h));assert.throws(()=>active.g.leave(active.r,active.h));
  const {g,r}=finishGame(2);const p=g.join(r.code,'New player');assert.equal(g.view(r,p).phase,'lobby');assert.equal(g.view(r,p).canStart,false);assert.equal(r.lastResults.length,2);
 });
+
+test('lobby kicks require the host, reject self/missing targets, and revoke old sessions',()=>{
+ const g=new Game(),{room:r,player:h}=g.create('Host'),p=g.join(r.code,'Guest');
+ assert.throws(()=>g.kick(r,p,h.id),/Only the host/);
+ assert.throws(()=>g.kick(r,h,h.id),/Leave room/);
+ assert.throws(()=>g.kick(r,h,'missing'),/no longer/);
+ assert.equal(r.players.length,2);assert.equal(g.kick(r,h,p.id),p);
+ assert.equal(r.players.length,1);assert.equal(r.host,h.id);assert.equal(g.view(r,h).canStart,false);
+ assert.throws(()=>g.auth(r,p.token),e=>e.code==='PLAYER_REMOVED');
+ assert.throws(()=>g.kick(r,h,p.id),/no longer/);
+ const again=g.join(r.code,'Guest');assert.notEqual(again.token,p.token);assert.equal(g.auth(r,again.token),again);
+});
+test('kicking is blocked in every active phase, including final-round reveal',()=>{
+ const {g,r,h,advance}=setup(2),p=r.players.find(p=>p.id!==h.id);
+ const reject=()=>{const before=structuredClone(r);assert.throws(()=>g.kick(r,h,p.id),/before or after/);assert.deepEqual(r,before);};
+ reject();g.choose(r,bluffer(r),wrong(r));reject();for(const s of solvers(r))g.choose(r,s,r.q.correct);reject();
+ g.next(r,h);reject();advance(30000);g.tick(r);g.choose(r,bluffer(r),wrong(r));for(const s of solvers(r))g.choose(r,s,r.q.correct);reject();
+ g.next(r,h);g.kick(r,h,p.id);assert.equal(r.players.length,1);
+});
+test('post-game kicks preserve standings and unblock a returned host',()=>{
+ const {g,r,h}=finishGame(3),others=r.players.filter(p=>p.id!==h.id),results=structuredClone(r.lastResults);
+ g.replay(r,h);g.replay(r,others[0]);assert.equal(g.view(r,h).phase,'lobby');assert.equal(g.view(r,h).canStart,false);
+ g.kick(r,h,others[1].id);assert.equal(r.phase,'lobby');assert.equal(g.view(r,h).canStart,true);assert.deepEqual(r.lastResults,results);
+ g.kick(r,h,others[0].id);assert.equal(g.view(r,h).canStart,false);assert.deepEqual(r.lastResults,results);
+});
