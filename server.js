@@ -30,7 +30,7 @@ const server=http.createServer(async(req,res)=>{try{
   publish(r);return json(res,200,{code:r.code,token:p.token,state:game.view(r,p)});
  }
  if(req.method==='GET'&&path==='/api/health')return json(res,200,{ok:true});
- const files={'/':'index.html','/app.js':'app.js','/style.css':'style.css','/rules':'rules.md'};
+ const files={'/':'index.html','/app.js':'app.js','/rules-dialog.js':'rules-dialog.js','/style.css':'style.css','/rules':'rules.md'};
  if(req.method!=='GET'||!files[path])return json(res,404,{error:'Not found.'});
  const data=await readFile(new URL('./public/'+files[path],import.meta.url));
  res.writeHead(200,{'Content-Type':path.endsWith('.js')?'text/javascript':path.endsWith('.css')?'text/css':path==='/rules'?'text/plain; charset=utf-8':'text/html; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(data);

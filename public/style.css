@@ -3,3 +3,27 @@
 .option:disabled{opacity:1;cursor:default}
 
 .kick{font-size:12px;padding:6px 10px;min-height:36px;flex-shrink:0}
+
+/* Kept outside #app so live room updates cannot dismiss the rules. */
+.rules-trigger{background:transparent;color:var(--muted);font-size:13px;padding:8px 10px;min-height:44px}
+.rules-trigger:hover{color:var(--text)}
+button:focus-visible,.rules-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+body.rules-open{overflow:hidden}
+#rules-dialog{color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:0;width:min(720px,calc(100% - 24px));max-width:none;max-height:calc(100dvh - 32px);overflow:hidden;box-shadow:0 24px 80px #0008}
+#rules-dialog[open]{display:flex;flex-direction:column}
+#rules-dialog::backdrop{background:rgb(0 0 0 / 70%)}
+.rules-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 24px 12px;flex-shrink:0}
+.rules-heading h2{margin:5px 0 0;font-size:25px}
+.rules-heading button{flex-shrink:0;font-size:14px}
+.rules-note{margin:0;padding:0 24px 18px;color:var(--muted);font-size:13px;border-bottom:1px solid var(--line);flex-shrink:0}
+.rules-scroll{overflow-y:auto;overscroll-behavior:contain;padding:20px 24px 28px;min-height:0}
+#rules-content h3{font-size:20px;margin:28px 0 12px;color:var(--accent)}
+#rules-content h4{font-size:16px;margin:18px 0 10px}
+#rules-content p{margin:0 0 16px}
+#rules-content ul{padding-left:22px;margin:0 0 20px}
+#rules-content li{margin:8px 0}
+.rules-table{overflow-x:auto;margin:14px 0 22px}
+.rules-table table{border-collapse:collapse;width:100%;font-size:14px}
+.rules-table th,.rules-table td{border-bottom:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top}
+.rules-table th{background:var(--bg);font-weight:700}
+@media(max-width:480px){.rules-heading{padding:18px 16px 12px}.rules-heading h2{font-size:21px}.rules-note{padding:0 16px 14px}.rules-scroll{padding:18px 16px 24px}.rules-table th,.rules-table td{padding:9px 8px}}
