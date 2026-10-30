@@ -28,7 +28,7 @@ function render(){if(!state)return home();const host=state.you===state.host;
  document.querySelector('#return-lobby').onclick=()=>{if(showLast){showLast=false;render();}else act('replay');};document.querySelector('#leave-room').onclick=()=>act('leave');bindKicks();return;
  }
  if(state.phase==='read'){
- app.innerHTML=top()+`<section class="panel" style="margin-top:24px"><div class="eyebrow">Read together · problem statement only</div><h2 style="margin-top:16px">${esc(state.puzzle.title)}</h2><p>${esc(state.puzzle.statement)}</p><p class="muted">Everyone gets the same introduction. The code appears after this phase; only the Bluffer will see answer choices initially.</p>${state.practice?(host?'<button id="begin-bluff">Show code →</button>':'<p class="hint">Untimed practice · waiting for the host to show the code.</p>'):'<p class="hint">The code appears automatically when the reading timer ends.</p>'}</section>`;
+ app.innerHTML=top()+`<section class="panel" style="margin-top:24px"><p>${esc(state.puzzle.statement)}</p></section>${state.practice?`<div class="action">${host?'<button id="begin-bluff">Show code →</button>':'<p class="hint">Untimed practice · waiting for the host to show the code.</p>'}</div>`:''}`;
  document.querySelector('#begin-bluff')?.addEventListener('click',()=>act('next'));clock();return;
  }
  const reveal=state.phase==='reveal',bluffer=state.you===state.bluffer,waiting=state.phase==='bluff'&&!bluffer;
