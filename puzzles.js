@@ -3,14 +3,12 @@ export const puzzles = [
     "title": "Find the target",
     "topic": "Binary search",
     "statement": "Find the index of a target in a sorted list of distinct integers, or return −1 if absent. The search must take logarithmic time.",
-    "code": "lo, hi = {{1}}, {{2}}\nwhile lo <= hi:\n    mid = (lo + hi) // 2\n    if nums[mid] == target:\n        return mid\n    if nums[mid] < target:\n        lo = {{3}}\n    else:\n        hi = {{4}}\nreturn -1",
+    "code": "lo, hi = 0, len(nums) - 1\nwhile lo <= hi:\n    mid = (lo + hi) // 2\n    if nums[mid] == target:\n        return mid\n    if nums[mid] < target:\n        lo = {{1}}\n    else:\n        hi = {{2}}\nreturn -1",
     "correct": "a",
     "options": [
       {
         "id": "a",
         "values": [
-          "0",
-          "len(nums) - 1",
           "mid + 1",
           "mid - 1"
         ],
@@ -19,8 +17,6 @@ export const puzzles = [
       {
         "id": "b",
         "values": [
-          "0",
-          "len(nums) - 1",
           "mid",
           "mid - 1"
         ],
@@ -29,8 +25,6 @@ export const puzzles = [
       {
         "id": "c",
         "values": [
-          "0",
-          "len(nums) - 1",
           "mid + 1",
           "mid"
         ],
@@ -39,18 +33,14 @@ export const puzzles = [
       {
         "id": "d",
         "values": [
-          "0",
-          "len(nums) - 1",
           "mid - 1",
           "mid + 1"
         ],
-        "why": "For [1, 3], target 3, the lower bound moves backward."
+        "why": "For [1, 3], target 3, lo becomes −1 and mid stays 0, so the loop never ends."
       },
       {
         "id": "e",
         "values": [
-          "0",
-          "len(nums) - 1",
           "hi + 1",
           "lo - 1"
         ],
@@ -116,7 +106,7 @@ export const puzzles = [
   },
   {
     "title": "A pair with a target sum",
-    "topic": "Hash maps",
+    "topic": "Hashing",
     "statement": "Return the indices of two different elements whose sum is target, or an empty list if no pair exists. Process the unsorted integers in one pass.",
     "code": "seen = {}\nfor i, x in enumerate(nums):\n    need = {{1}}\n    if need in seen:\n        return [seen[need], i]\n    seen[{{2}}] = {{3}}\nreturn []",
     "correct": "a",
@@ -171,7 +161,7 @@ export const puzzles = [
   },
   {
     "title": "Any duplicate?",
-    "topic": "Hash maps",
+    "topic": "Hashing",
     "statement": "Determine whether an unsorted list of integers contains any repeated value. Use one pass with extra space allowed.",
     "code": "seen = set()\nfor x in nums:\n    if {{1}}:\n        return True\n    seen.add(x)\nreturn False",
     "correct": "a",
@@ -216,7 +206,7 @@ export const puzzles = [
   },
   {
     "title": "Count target-sum subarrays",
-    "topic": "Hash maps",
+    "topic": "Hashing",
     "statement": "Count contiguous subarrays whose sum is k; integers may be negative. Find a solution that scans the list once.",
     "code": "freq = {0: 1}\ntotal = count = 0\nfor x in nums:\n    total += x\n    count += freq.get({{1}}, 0)\n    freq[total] = freq.get(total, 0) + 1\nreturn count",
     "correct": "a",
@@ -440,7 +430,7 @@ export const puzzles = [
           "0",
           "1"
         ],
-        "why": "For [1, 2, 3], the first element is swapped twice and the result is wrong."
+        "why": "For [1, 2, 3], index 0 participates in both swaps, producing [2, 3, 1] instead of [3, 2, 1]."
       },
       {
         "id": "c",
@@ -448,7 +438,7 @@ export const puzzles = [
           "1",
           "0"
         ],
-        "why": "For [1, 2, 3], the last element is swapped twice."
+        "why": "For [1, 2, 3], index 2 participates in both swaps, producing [3, 1, 2] instead of [3, 2, 1]."
       },
       {
         "id": "d",
@@ -622,7 +612,7 @@ export const puzzles = [
   {
     "title": "Best contiguous sum",
     "topic": "Dynamic programming",
-    "statement": "Return the largest sum of a nonempty contiguous subarray from a nonempty integer list. Values may all be negative; solve in one pass.",
+    "statement": "Return the largest sum of a non-empty contiguous subarray from a non-empty integer list. Values may all be negative; solve in one pass.",
     "code": "current = best = nums[0]\nfor x in nums[1:]:\n    current = {{1}}\n    best = {{2}}\nreturn best",
     "correct": "a",
     "options": [
@@ -670,9 +660,9 @@ export const puzzles = [
     "explanation": "Track the best sum ending at the current position separately from the best sum seen anywhere."
   },
   {
-    "title": "Maximum nonadjacent sum",
+    "title": "Maximum non-adjacent sum",
     "topic": "Dynamic programming",
-    "statement": "Choose nonadjacent elements from a list of nonnegative integers to maximize their sum. Choosing no elements is allowed; use constant extra space.",
+    "statement": "Choose non-adjacent elements from a list of non-negative integers to maximize their sum. Choosing no elements is allowed; use constant extra space.",
     "code": "prev2 = prev1 = 0\nfor x in nums:\n    prev2, prev1 = {{1}}, {{2}}\nreturn prev1",
     "correct": "a",
     "options": [
@@ -714,7 +704,7 @@ export const puzzles = [
           "prev1",
           "max(prev2, x)"
         ],
-        "why": "For [2, 1, 2], it never combines the two nonadjacent 2s."
+        "why": "For [2, 1, 2], it never combines the two non-adjacent 2s."
       }
     ],
     "explanation": "At each index, compare skipping the element against taking it plus the best result that excludes its neighbor."
@@ -771,7 +761,7 @@ export const puzzles = [
   },
   {
     "title": "Longest run of ones",
-    "topic": "Sliding window",
+    "topic": "Counting",
     "statement": "Return the length of the longest contiguous run of 1s in a list containing only 0s and 1s. Use one pass and constant extra space.",
     "code": "run = best = 0\nfor x in nums:\n    if x == 1:\n        run = {{1}}\n    else:\n        run = {{2}}\n    best = max(best, run)\nreturn best",
     "correct": "a",
