@@ -29,3 +29,7 @@ body.rules-open{overflow:hidden}
 @media(max-width:480px){.rules-heading{padding:18px 16px 12px}.rules-heading h2{font-size:21px}.rules-note{padding:0 16px 14px}.rules-scroll{padding:18px 16px 24px}.rules-table th,.rules-table td{padding:9px 8px}}
 
 #connection:empty{display:none}
+
+/* Keep native select behavior with an inset, consistently placed arrow. */
+select{appearance:none;-webkit-appearance:none;padding-right:44px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='m3 6 5 5 5-5' fill='none' stroke='%23edf0f5' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:16px 16px}
+@media(forced-colors:active){select{appearance:auto;-webkit-appearance:auto;background-image:none}}
